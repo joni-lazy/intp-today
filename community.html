@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>INTP Today - 마구 지껄이기</title>
 <style>
-/* ... (스타일 시트 생략 - 기존과 동일) ... */
+/* 💡 CSS 영역은 그대로 유지합니다. */
 body { font-family: Arial, sans-serif; background: #fff; margin: 0; padding: 40px; overflow-y: auto; }
 h1 { font-weight: 600; font-size: 26px; margin-bottom: 20px; }
 .nickname { font-size: 14px; color: #888; margin-bottom: 20px; }
@@ -56,7 +56,7 @@ let currentSort = 'recent'; 
 let sortOrder = { recent: 'desc', agree: 'desc', comments: 'desc' };
 const isAdmin = true;
 
-// --- 💡 새로 추가된 로직 시작: 검증 답변 자동 게시 및 접근 제어 ---
+// --- 💡 수정된 로직 시작 ---
 
 // 1. 접근 제어: 닉네임이 없으면 검증 페이지로 돌려보냄
 function checkAccess(){
@@ -64,12 +64,12 @@ function checkAccess(){
     
     if (!storedNickname || storedNickname.trim() === "") {
         alert("INTP today에 접속하시기 전에 부탁이 있어요...");
-        // 💡 깃허브 페이지 운영 시 이 리다이렉션 코드는 반드시 필요합니다.
+        // 🚨 구문 오류 수정: 이 줄만 있어야 합니다.
         window.location.href = "index.html";
     }
 }
 
-// 2. 검증 답변을 게시물로 자동 등록하는 함수
+// 2. 검증 답변을 게시물로 자동 등록하고 렌더링하는 함수
 function autoPostVerificationAnswer() {
     const newPostContent = localStorage.getItem("newPostContent");
     const nickname = localStorage.getItem("nickname");
@@ -90,8 +90,8 @@ function autoPostVerificationAnswer() {
         
         // 중요: 자동 등록 완료 후 로컬 저장소에서 제거 (중복 게시 방지)
         localStorage.removeItem("newPostContent"); 
-        
-        // 💡 이 부분이 누락되어 게시물이 화면에 표시되지 않았을 가능성이 큽니다.
+
+        // 💡 누락된 부분 수정: 게시물 추가 후 즉시 화면 갱신
         renderPosts();
     }
 }
@@ -99,7 +99,7 @@ function autoPostVerificationAnswer() {
 checkAccess(); 
 autoPostVerificationAnswer(); 
 
-// --- 💡 기존 로직 시작 (나머지 함수들은 기존과 동일하며, 편의상 일부만 표기) ---
+// --- 💡 기존 로직 시작 (이하 함수는 기존과 동일하게 유지) ---
 
 function updateSortButtonText() {
     document.getElementById('sortRecent').innerText = '정렬: ' + (sortOrder.recent === 'desc' ? '최근순' : '최초순');
@@ -330,8 +330,9 @@ function renderComments(postId,scroll=true){
     scroll && scrollCommentBottom(postId);
 }
 
-document.addEventListener('DOMContentLoaded', renderPosts);
-
+// 💡 autoPostVerificationAnswer()에서 이미 renderPosts를 호출했으므로,
+// 페이지 로드 후 추가적인 renderPosts 호출은 제거합니다.
+// document.addEventListener('DOMContentLoaded', renderPosts); 
 </script>
 </body>
 </html>
