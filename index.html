@@ -42,13 +42,15 @@
   <div id="result"></div>
 
 <script>
-// 답변이 커뮤니티에 자동 게시되는 효율적인 플로우
 function submitForm() {
     const nickname = document.getElementById("nickname").value.trim();
     const answer = document.getElementById("answer").value.trim();
     const resultDiv = document.getElementById("result");
 
-    if (!answer || answer.length < 50) { 
+    // 💡 제한 키워드 목록
+    const restrictedNames = ["운영자", "관리자", "admin", "tester", "test", "administrator"];
+
+    if (!answer || answer.length < 50) { 
         resultDiv.style.color = "red";
         resultDiv.innerHTML = "답변은 최소 50자 이상!";
         return;
@@ -59,17 +61,43 @@ function submitForm() {
         return;
     }
 
+    // 💡 닉네임 제한 검사
+    const isRestricted = restrictedNames.some(keyword => nickname.toLowerCase().includes(keyword.toLowerCase()));
+    
+    // 관리자 접속 조건을 제외하고 제한
+    if (isRestricted && (nickname !== "관리자" || answer !== "나는아이엔티피투데이의대장이다")) {
+        resultDiv.style.color = "red";
+        resultDiv.innerHTML = "해당 닉네임은 사용할 수 없습니다. 다른 이름을 선택해 주십시오.";
+        return;
+    }
+
+    // 💡 관리자 키워드 및 닉네임 설정
+    const adminKeyword = "나는INTP의신";
+    const adminNickname = "관리자";
+    
+    let finalNickname = nickname;
+    let postContent = answer;
+    
+    // 💡 관리자 접속 조건 확인 및 데이터 처리
+    if (answer.trim() === adminKeyword && nickname.trim() === adminNickname) {
+        localStorage.setItem("isAdminMode", "true");
+        finalNickname = adminNickname;
+        postContent = "INTP today 관리자가 등장했습니다."; // 관리자 게시글 내용 변경
+        resultDiv.innerHTML = `**관리자 모드**로 접속합니다. 잠시 후 입장합니다...`;
+    } else {
+        localStorage.removeItem("isAdminMode"); // 일반 접속 시 플래그 제거
+        resultDiv.style.color = "green";
+        resultDiv.innerHTML = `${nickname}님의 답변 업로드 중(돌이킬 수 없음). 잠시 후 입장합니다...`;
+    }
+
     // 1. 닉네임과 답변 내용을 로컬 저장소에 저장 (커뮤니티 페이지로 전달)
-    localStorage.setItem("nickname", nickname); 
-    localStorage.setItem("newPostContent", answer); 
+    localStorage.setItem("nickname", finalNickname); 
+    localStorage.setItem("newPostContent", postContent); 
     
     // 2. 즉시 커뮤니티 페이지로 리다이렉션
-    resultDiv.style.color = "green";
-    resultDiv.innerHTML = `${nickname}님의 답변 업로드 중(돌이킬 수 없음). 잠시 후 입장합니다...`;
-    
     setTimeout(() => {
-         window.location.href = "community.html"; 
-    }, 1000); 
+        window.location.href = "community.html"; 
+    }, 1000); 
 }
 </script>
 
