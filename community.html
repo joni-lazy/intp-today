@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>INTP Today - 마구 지껄이기</title>
 <style>
+/* ... (스타일 시트 생략 - 기존과 동일) ... */
 body { font-family: Arial, sans-serif; background: #fff; margin: 0; padding: 40px; overflow-y: auto; }
 h1 { font-weight: 600; font-size: 26px; margin-bottom: 20px; }
 .nickname { font-size: 14px; color: #888; margin-bottom: 20px; }
@@ -49,9 +50,9 @@ button { padding: 8px 14px; margin-top: 10px; cursor: pointer; background: black
 </div>
 
 <script>
-const MAX_COMMENT_HEIGHT = 400; 
+const MAX_COMMENT_HEIGHT = 400; 
 let posts = [];
-let currentSort = 'recent'; 
+let currentSort = 'recent'; 
 let sortOrder = { recent: 'desc', agree: 'desc', comments: 'desc' };
 const isAdmin = true;
 
@@ -63,7 +64,8 @@ function checkAccess(){
     
     if (!storedNickname || storedNickname.trim() === "") {
         alert("INTP today에 접속하시기 전에 부탁이 있어요...");
-         window.location.href = "index.html"; 실제 운영 시 주석 해제
+        // 💡 깃허브 페이지 운영 시 이 리다이렉션 코드는 반드시 필요합니다.
+        window.location.href = "index.html";
     }
 }
 
@@ -76,7 +78,7 @@ function autoPostVerificationAnswer() {
         // 새로운 게시물 생성
         const newPost = {
             id: 'post_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            content: newPostContent, 
+            content: newPostContent, 
             nickname: nickname,
             timestamp: Date.now(),
             agree: 0,
@@ -87,14 +89,17 @@ function autoPostVerificationAnswer() {
         posts.unshift(newPost);
         
         // 중요: 자동 등록 완료 후 로컬 저장소에서 제거 (중복 게시 방지)
-        localStorage.removeItem("newPostContent"); 
+        localStorage.removeItem("newPostContent"); 
+        
+        // 💡 이 부분이 누락되어 게시물이 화면에 표시되지 않았을 가능성이 큽니다.
+        renderPosts();
     }
 }
 
-checkAccess(); 
-autoPostVerificationAnswer(); 
+checkAccess(); 
+autoPostVerificationAnswer(); 
 
-// --- 💡 기존 로직 시작 ---
+// --- 💡 기존 로직 시작 (나머지 함수들은 기존과 동일하며, 편의상 일부만 표기) ---
 
 function updateSortButtonText() {
     document.getElementById('sortRecent').innerText = '정렬: ' + (sortOrder.recent === 'desc' ? '최근순' : '최초순');
@@ -108,7 +113,6 @@ function updateSortButtonText() {
 
 function initializeNickname(){
     let name = localStorage.getItem("nickname");
-    // checkAccess()가 이미 닉네임 존재를 확인했으므로, 여기서 랜덤 생성 로직은 불필요하지만 유지
     if(!name){
         let number = Math.floor(Math.random()*9000)+1000;
         name = "INTP #"+number;
@@ -167,7 +171,7 @@ function toggleContent(postId){
 
 function deletePost(postId){
     posts = posts.filter(p=>p.id!==postId);
-    renderPosts(); 
+    renderPosts(); 
 }
 
 function submitComment(postId){
@@ -181,39 +185,35 @@ function submitComment(postId){
     }
     input.value='';
     renderComments(postId,true);
-    // 댓글 작성 후 전체 재렌더링 제거 (댓글창 닫힘 방지)
-    // renderPosts(); 
 }
 
-function agreePost(event,postId){ 
-    event.stopPropagation(); 
-    const post=posts.find(p=>p.id===postId); 
-    if(post){ 
-        post.agree++; 
-        // 동의 수 변경은 정렬에 영향을 미치므로 renderPosts() 유지
+function agreePost(event,postId){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
+    if(post){ 
+        post.agree++; 
         renderPosts();
-    } 
+    } 
 }
 
-function agreeComment(event,postId,index){ 
-    event.stopPropagation(); 
-    const post=posts.find(p=>p.id===postId); 
+function agreeComment(event,postId,index){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
     if(post && post.comments[index]){
-        post.comments[index].agree++; 
-        renderComments(postId,false); 
-    } 
+        post.comments[index].agree++; 
+        renderComments(postId,false); 
+    } 
 }
 
-function deleteComment(event,postId,index){ 
-    event.stopPropagation(); 
-    const post=posts.find(p=>p.id===postId); 
-    if(post && post.comments[index]){ 
-        post.comments.splice(index,1); 
-        renderComments(postId,false); 
+function deleteComment(event,postId,index){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
+    if(post && post.comments[index]){ 
+        post.comments.splice(index,1); 
+        renderComments(postId,false); 
         updateCommentCount(postId);
-        // 댓글 수 변경은 정렬에 영향을 미치므로 renderPosts() 유지
-        renderPosts(); 
-    } 
+        renderPosts(); 
+    } 
 }
 
 function toggleComment(postId){
@@ -238,7 +238,7 @@ function updateCommentCount(postId){
     if(commentBtn) commentBtn.innerText = `💬 댓글 ${post.comments.length}개`;
 }
 
-// 댓글창 상태 저장/복원 로직 포함된 renderPosts 함수 (기존 로직 유지)
+// 댓글창 상태 저장/복원 로직 포함된 renderPosts 함수
 function renderPosts(){
     const postListDiv=document.getElementById('postList');
     if(posts.length===0) {
@@ -260,7 +260,7 @@ function renderPosts(){
             if(a.agree !== b.agree) {
                 return (a.agree - b.agree) * orderMultiplier;
             }
-            return b.timestamp - a.timestamp; 
+            return b.timestamp - a.timestamp; 
         });
     }
     else if(currentSort === 'comments') {
@@ -272,7 +272,7 @@ function renderPosts(){
         });
     }
     
-    postListDiv.innerHTML = ''; 
+    postListDiv.innerHTML = ''; 
 
     sortedPosts.forEach(post=>{
         const postDiv=document.createElement('div');
@@ -322,7 +322,7 @@ function renderComments(postId,scroll=true){
     const listDiv = section.querySelector('.comment-list');
     listDiv.innerHTML = post.comments.map((c,index)=>{
         const isAuthor = c.nickname === localStorage.getItem('nickname');
-        return `<div class='comment'>- ${c.nickname}: ${c.content} 
+        return `<div class='comment'>- ${c.nickname}: ${c.content} 
             <span class='comment-actions' onclick='agreeComment(event,"${postId}",${index})'>👍 ${c.agree}</span>
             ${isAuthor?`<span class='comment-delete' onclick='deleteComment(event,"${postId}",${index})'>삭제</span>`:''}
         </div>`;
@@ -330,7 +330,6 @@ function renderComments(postId,scroll=true){
     scroll && scrollCommentBottom(postId);
 }
 
-// 💡 자동 게시 로직이 posts 배열을 업데이트했으므로, 페이지 로드 후 게시물 렌더링을 실행합니다.
 document.addEventListener('DOMContentLoaded', renderPosts);
 
 </script>
