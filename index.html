@@ -1,3 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>INTP today - 들어가기 전에...</title>
+  <style>
+    body { margin: 0 auto; padding: 60px 30px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #ffffff; color: #111; max-width: 700px; line-height: 1.6; }
+    h1 { font-size: 26px; font-weight: 600; margin-bottom: 40px; }
+    label { display: block; margin-top: 36px; font-weight: 500; font-size: 15px; }
+    label::after { content: "*"; color: red; margin-left: 4px; }
+    textarea { width: 100%; height: 140px; margin-top: 8px; padding: 10px; border: 1px solid #ddd; font-family: inherit; font-size: 14px; resize: vertical; box-sizing: border-box; }
+    input[type="text"] { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+    button { margin-top: 32px; padding: 12px 22px; border: 1px solid #333; background: #fff; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+    button:hover{ background: #fafafa; }
+    .notice { color: #d9534f; font-size: 14px; margin-top: 15px; font-weight: 600; padding: 10px; border: 1px solid #d9534f; background-color: #fcf8f2; }
+    #result { margin-top: 20px; font-size: 15px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <h1>INTP.today</h1>
+  <p>INTP today의 입장에 앞서 간단한 질문에 답해 주십시오.<br>
+  사실 사이트 자체는 엄청 허접하니 아무것도 기대하시면 안됩니다...</p>
+
+  <div class="notice">
+    ⚠️ **주의: 이 답변은 제출과 동시에 게시물로 자동 업로드됩니다.**
+  </div>
+
+  <label>
+    Q. 당신은 중대한 우주의 비밀에 대해 6개월간 고심한 끝에 완벽한 논리적 설명을 발견해냈습니다. 이 위대한 발견을 우주에 대한 이해도가 낮은 애인에게 5분 안에 발표해야 합니다.<br>
+    당신은 어떻게 발표를 준비할까요? (최소 50자 이상)
+    <textarea id="answer" required></textarea>
+  </label>
+
+  <label>
+    INTP Today에서 사용할 닉네임
+    <input type="text" id="nickname" placeholder="닉네임 입력" required>
+  </label>
+
+  <button onclick="submitForm()">답변 제출하며 시끄럽게 등장하기</button>
+
+  <div id="result"></div>
+
 <script>
 function submitForm() {
     const nickname = document.getElementById("nickname").value.trim();
@@ -5,15 +48,16 @@ function submitForm() {
     const resultDiv = document.getElementById("result");
 
     // 💡 관리자 키워드 및 닉네임 설정
-    const adminKeyword = "나는아이엔티피투데이의대장이다";
+    const adminKeyword = "나는INTP의신";
     const adminNickname = "관리자";
-
-    // 💡 제한 키워드 목록
     const restrictedNames = ["운영자", "관리자", "admin", "tester", "test", "administrator"];
 
+    // 💡 관리자 접속 시도 여부
+    const isAdminAttempt = (answer === adminKeyword && nickname === adminNickname);
+
     // 1. 답변 길이 검사 (관리자 키워드 예외 처리)
-    if (answer.trim() !== adminKeyword) {
-        if (!answer || answer.length < 50) { 
+    if (!isAdminAttempt) { // 관리자 접속 시도가 아닐 때만 50자 검사
+        if (!answer || answer.length < 50) {
             resultDiv.style.color = "red";
             resultDiv.innerHTML = "답변은 최소 50자 이상!";
             return;
@@ -30,9 +74,7 @@ function submitForm() {
     // 3. 닉네임 제한 검사
     const isRestricted = restrictedNames.some(keyword => nickname.toLowerCase().includes(keyword.toLowerCase()));
     
-    // 관리자 접속 조건을 제외하고 제한
-    const isAdminAttempt = (answer.trim() === adminKeyword && nickname.trim() === adminNickname);
-    
+    // 닉네임 제한 검사 (관리자 시도일 경우 통과)
     if (isRestricted && !isAdminAttempt) {
         resultDiv.style.color = "red";
         resultDiv.innerHTML = "해당 닉네임은 사용할 수 없습니다. 다른 이름을 선택해 주십시오.";
@@ -46,7 +88,7 @@ function submitForm() {
     if (isAdminAttempt) {
         localStorage.setItem("isAdminMode", "true");
         finalNickname = adminNickname;
-        postContent = "INTP today 관리자가 등장했습니다."; // 관리자 게시글 내용 변경
+        postContent = "INTP today 관리자가 등장했습니다.";
         resultDiv.innerHTML = `**관리자 모드**로 접속합니다. 잠시 후 입장합니다...`;
     } else {
         localStorage.removeItem("isAdminMode"); // 일반 접속 시 플래그 제거
@@ -64,3 +106,6 @@ function submitForm() {
     }, 1000); 
 }
 </script>
+
+</body>
+</html>
