@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>INTP today - 검증 및 첫 게시</title>
+  <style>
+    body { margin: 0 auto; padding: 60px 30px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #ffffff; color: #111; max-width: 700px; line-height: 1.6; }
+    h1 { font-size: 26px; font-weight: 600; margin-bottom: 40px; }
+    label { display: block; margin-top: 36px; font-weight: 500; font-size: 15px; }
+    label::after { content: "*"; color: red; margin-left: 4px; }
+    textarea { width: 100%; height: 140px; margin-top: 8px; padding: 10px; border: 1px solid #ddd; font-family: inherit; font-size: 14px; resize: vertical; box-sizing: border-box; }
+    input[type="text"] { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+    button { margin-top: 32px; padding: 12px 22px; border: 1px solid #333; background: #fff; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+    button:hover{ background: #fafafa; }
+    .notice { color: #d9534f; font-size: 14px; margin-top: 15px; font-weight: 600; padding: 10px; border: 1px solid #d9534f; background-color: #fcf8f2; }
+    #result { margin-top: 20px; font-size: 15px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <h1>INTP.today</h1>
+  <p>INTP 전용 커뮤니티 입장에 앞서 간단한 검증 질문에 답해 주십시오.</p>
+
+  <div class="notice">
+    ⚠️ **주의: 이 답변은 커뮤니티 페이지 접속과 동시에 첫 번째 게시물로 자동 업로드됩니다.**
+  </div>
+
+  <label>
+    Q. 당신은 중대한 우주의 비밀에 대해 6개월간 고심한 끝에 완벽한 논리적 설명을 발견해냈습니다. 이 위대한 발견을 **우주에 대한 이해도가 낮은 애인에게 5분 안에 발표해야 합니다.**<br>
+    당신은 어떻게 발표를 준비할까요? 논리적 설명의 깊이와 커뮤니케이션의 효율성 중 무엇을 우선시할지 설명해 주십시오. (최소 50자 이상)
+    <textarea id="answer" required></textarea>
+  </label>
+
+  <label>
+    사용할 닉네임 (커뮤니티에서 사용할 이름)
+    <input type="text" id="nickname" placeholder="닉네임 입력" required>
+  </label>
+
+  <button onclick="submitForm()">답변 제출 및 커뮤니티 입장</button>
+
+  <div id="result"></div>
+
+<script>
+// 답변이 커뮤니티에 자동 게시되는 효율적인 플로우
+function submitForm() {
+    const nickname = document.getElementById("nickname").value.trim();
+    const answer = document.getElementById("answer").value.trim();
+    const resultDiv = document.getElementById("result");
+
+    if (!answer || answer.length < 50) { 
+        resultDiv.style.color = "red";
+        resultDiv.innerHTML = "답변은 최소 50자 이상 입력해야 합니다.";
+        return;
+    }
+    if (!nickname) {
+        resultDiv.style.color = "red";
+        resultDiv.innerHTML = "사용할 닉네임을 입력해야 합니다.";
+        return;
+    }
+
+    // 1. 닉네임과 답변 내용을 로컬 저장소에 저장 (커뮤니티 페이지로 전달)
+    localStorage.setItem("nickname", nickname); 
+    localStorage.setItem("newPostContent", answer); 
+    
+    // 2. 즉시 커뮤니티 페이지로 리다이렉션
+    resultDiv.style.color = "green";
+    resultDiv.innerHTML = `${nickname}님의 답변이 게시판에 업로드됩니다. 잠시 후 입장합니다...`;
+    
+    setTimeout(() => {
+         window.location.href = "community.html"; 
+    }, 1000); 
+}
+</script>
+
+</body>
+</html>

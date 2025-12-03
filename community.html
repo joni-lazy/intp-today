@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>INTP Community - 최신판</title>
+<style>
+body { font-family: Arial, sans-serif; background: #fff; margin: 0; padding: 40px; overflow-y: auto; }
+h1 { font-weight: 600; font-size: 26px; margin-bottom: 20px; }
+.nickname { font-size: 14px; color: #888; margin-bottom: 20px; }
+.container { max-width: 800px; margin: auto; }
+textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; resize: none; background: #fafafa; }
+button { padding: 8px 14px; margin-top: 10px; cursor: pointer; background: black; color: white; border-radius: 4px; border: none; }
+.post { border: 1px solid #eee; padding: 18px; border-radius: 6px; margin-top: 20px; background: #fafafa; position: relative; box-sizing: border-box; width: 100%; }
+.post .info { font-size: 13px; color: #777; margin-bottom: 8px; }
+.actions { font-size: 13px; margin-top: 8px; }
+.actions span { cursor: pointer; margin-right: 14px; }
+.post-content.collapsed { max-height: 100px; overflow: hidden; }
+.comment-section { display: flex; flex-direction: column; margin-top: 12px; border-top: 1px solid #eee; background:#f9f9f9; padding:5px; position: relative; }
+.comment-list { overflow-y: auto; max-height: 400px; }
+.comment { font-size: 14px; padding: 6px 0; margin-left: 10px; word-break: break-word; position: relative; }
+.comment-actions { font-size: 12px; margin-left: 10px; cursor: pointer; color: #555; }
+.comment-delete { position: absolute; right: 10px; font-size: 12px; color: red; cursor: pointer; }
+.comment-input-area { display: flex; flex-direction: column; margin-top: 6px; }
+.comment-input-area textarea { height: 60px; resize: none; }
+.toggle-content-btn, .delete-post-btn { position: absolute; top: 10px; font-size: 12px; cursor: pointer; color: #555; background: none; border: none; }
+.toggle-content-btn { right: 90px; }
+.delete-post-btn { right: 170px; }
+.sort-buttons { margin-bottom: 20px; }
+.sort-buttons button { margin-right: 10px; background: #333; color:white; }
+#postList { width: 100%; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>INTP 커뮤니티 (최신판)</h1>
+<div class="nickname" id="nicknameDisplay"></div>
+
+<textarea id="postInput" placeholder="당신의 아무말을 남겨보세요."></textarea>
+<button onclick="submitPost()">게시</button>
+
+<div class="sort-buttons">
+    <button id="sortRecent" onclick="toggleSort('recent')">정렬: 최근순</button>
+    <button id="sortAgree" onclick="toggleSort('agree')">정렬: 따봉순 ▼</button>
+    <button id="sortComments" onclick="toggleSort('comments')">정렬: 댓글많은순 ▼</button>
+</div>
+
+<div id="postList"></div>
+</div>
+
+<script>
+const MAX_COMMENT_HEIGHT = 400; 
+let posts = [];
+let currentSort = 'recent'; 
+let sortOrder = { recent: 'desc', agree: 'desc', comments: 'desc' };
+const isAdmin = true;
+
+// --- 💡 새로 추가된 로직 시작: 검증 답변 자동 게시 및 접근 제어 ---
+
+// 1. 접근 제어: 닉네임이 없으면 검증 페이지로 돌려보냄
+function checkAccess(){
+    const storedNickname = localStorage.getItem("nickname");
+    
+    if (!storedNickname || storedNickname.trim() === "") {
+        alert("커뮤니티 이용을 위해서는 먼저 검증 페이지를 통과해야 합니다.");
+        // window.location.href = "index.html"; // 실제 운영 시 주석 해제
+    }
+}
+
+// 2. 검증 답변을 게시물로 자동 등록하는 함수
+function autoPostVerificationAnswer() {
+    const newPostContent = localStorage.getItem("newPostContent");
+    const nickname = localStorage.getItem("nickname");
+
+    if (newPostContent && nickname) {
+        // 새로운 게시물 생성
+        const newPost = {
+            id: 'post_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            content: newPostContent, 
+            nickname: nickname,
+            timestamp: Date.now(),
+            agree: 0,
+            comments: []
+        };
+
+        // posts 배열의 맨 앞에 추가
+        posts.unshift(newPost);
+        
+        // 중요: 자동 등록 완료 후 로컬 저장소에서 제거 (중복 게시 방지)
+        localStorage.removeItem("newPostContent"); 
+    }
+}
+
+checkAccess(); 
+autoPostVerificationAnswer(); 
+
+// --- 💡 기존 로직 시작 ---
+
+function updateSortButtonText() {
+    document.getElementById('sortRecent').innerText = '정렬: ' + (sortOrder.recent === 'desc' ? '최근순' : '최초순');
+    document.getElementById('sortAgree').innerText = '정렬: 따봉순 ' + (sortOrder.agree === 'desc' ? '▼' : '▲');
+    document.getElementById('sortComments').innerText = '정렬: 댓글많은순 ' + (sortOrder.comments === 'desc' ? '▼' : '▲');
+    
+    document.querySelectorAll('.sort-buttons button').forEach(btn => {
+        btn.style.backgroundColor = btn.id.includes(currentSort.charAt(0).toUpperCase() + currentSort.slice(1)) ? '#007bff' : '#333';
+    });
+}
+
+function initializeNickname(){
+    let name = localStorage.getItem("nickname");
+    // checkAccess()가 이미 닉네임 존재를 확인했으므로, 여기서 랜덤 생성 로직은 불필요하지만 유지
+    if(!name){
+        let number = Math.floor(Math.random()*9000)+1000;
+        name = "INTP #"+number;
+        localStorage.setItem("nickname", name);
+    }
+    document.getElementById("nicknameDisplay").innerText = "당신의 닉네임: "+name;
+    updateSortButtonText();
+}
+initializeNickname();
+
+function generateId(){ return 'post_'+Date.now()+'_'+Math.floor(Math.random()*1000); }
+
+function sanitizeHTML(input){
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = input;
+    const allowedTags=['B','STRONG','I','EM','U','BR','BLOCKQUOTE','SPAN'];
+    const elements=tempDiv.getElementsByTagName('*');
+    for(let i=elements.length-1;i>=0;i--){
+        const el=elements[i];
+        if(!allowedTags.includes(el.tagName)){
+            el.replaceWith(document.createTextNode(el.innerText));
+        } else if(el.tagName==='SPAN'){
+            const color = el.style.color;
+            const isValidColor = /^([a-zA-Z]+|#[0-9A-Fa-f]{3,6})$/.test(color);
+            el.style = isValidColor ? `color:${color}` : '';
+        }
+    }
+    return tempDiv.innerHTML;
+}
+
+function toggleSort(sortType){
+    if(currentSort === sortType) {
+        sortOrder[sortType] = sortOrder[sortType] === 'desc' ? 'asc' : 'desc';
+    } else {
+        currentSort = sortType;
+    }
+    updateSortButtonText();
+    renderPosts();
+}
+
+function submitPost(){
+    const input=document.getElementById('postInput');
+    if(!input.value.trim()) return;
+    const sanitizedContent=sanitizeHTML(input.value);
+    posts.unshift({id:generateId(),content:sanitizedContent,nickname:localStorage.getItem('nickname'),timestamp:Date.now(),agree:0,comments:[]});
+    input.value='';
+    renderPosts();
+}
+
+function toggleContent(postId){
+    const content=document.getElementById('content'+postId);
+    const btn=document.getElementById('toggleBtn'+postId);
+    content.classList.toggle('collapsed');
+    btn.innerText = content.classList.contains('collapsed') ? '내용 펼치기 ▼':'내용 접기 ▲';
+}
+
+function deletePost(postId){
+    posts = posts.filter(p=>p.id!==postId);
+    renderPosts(); 
+}
+
+function submitComment(postId){
+    const input=document.getElementById('commentInput'+postId);
+    if(!input.value.trim()) return;
+    const sanitizedComment=sanitizeHTML(input.value);
+    const post = posts.find(p=>p.id===postId);
+    if(post){
+        post.comments.push({nickname:localStorage.getItem('nickname'),content:sanitizedComment,agree:0});
+        updateCommentCount(postId);
+    }
+    input.value='';
+    renderComments(postId,true);
+    // 댓글 작성 후 전체 재렌더링 제거 (댓글창 닫힘 방지)
+    // renderPosts(); 
+}
+
+function agreePost(event,postId){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
+    if(post){ 
+        post.agree++; 
+        // 동의 수 변경은 정렬에 영향을 미치므로 renderPosts() 유지
+        renderPosts();
+    } 
+}
+
+function agreeComment(event,postId,index){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
+    if(post && post.comments[index]){
+        post.comments[index].agree++; 
+        renderComments(postId,false); 
+    } 
+}
+
+function deleteComment(event,postId,index){ 
+    event.stopPropagation(); 
+    const post=posts.find(p=>p.id===postId); 
+    if(post && post.comments[index]){ 
+        post.comments.splice(index,1); 
+        renderComments(postId,false); 
+        updateCommentCount(postId);
+        // 댓글 수 변경은 정렬에 영향을 미치므로 renderPosts() 유지
+        renderPosts(); 
+    } 
+}
+
+function toggleComment(postId){
+    const section = document.getElementById('c'+postId);
+    section.style.display = section.style.display==='flex'?'none':'flex';
+    if(section.style.display==='flex') scrollCommentBottom(postId);
+}
+
+function scrollCommentBottom(postId){
+    const listDiv = document.querySelector('#c'+postId+' .comment-list');
+    if(listDiv){
+        listDiv.scrollTop = listDiv.scrollHeight;
+        listDiv.style.maxHeight = MAX_COMMENT_HEIGHT+'px';
+        listDiv.style.overflowY = (listDiv.scrollHeight>MAX_COMMENT_HEIGHT)?'auto':'visible';
+    }
+}
+
+function updateCommentCount(postId){
+    const post = posts.find(p=>p.id===postId);
+    if(!post) return;
+    const commentBtn = document.querySelector('#post_'+postId+' .actions span.comment-btn');
+    if(commentBtn) commentBtn.innerText = `💬 댓글 ${post.comments.length}개`;
+}
+
+// 댓글창 상태 저장/복원 로직 포함된 renderPosts 함수 (기존 로직 유지)
+function renderPosts(){
+    const postListDiv=document.getElementById('postList');
+    if(posts.length===0) {
+        postListDiv.innerHTML = '<p style="text-align:center; color:#777; margin-top:30px;">아직 게시물이 없습니다. 당신의 아무말을 남겨보세요!</p>';
+        return;
+    }
+    
+    // 재렌더링 전에 현재 열려있는 댓글창 ID를 저장합니다.
+    const openCommentIds = Array.from(document.querySelectorAll('.comment-section')).filter(c => c.style.display === 'flex').map(c => c.id);
+
+    let sortedPosts = [...posts];
+    const orderMultiplier = sortOrder[currentSort] === 'asc' ? 1 : -1;
+
+    if(currentSort === 'recent') {
+        sortedPosts.sort((a,b) => (a.timestamp - b.timestamp) * orderMultiplier);
+    }
+    else if(currentSort === 'agree') {
+        sortedPosts.sort((a,b) => {
+            if(a.agree !== b.agree) {
+                return (a.agree - b.agree) * orderMultiplier;
+            }
+            return b.timestamp - a.timestamp; 
+        });
+    }
+    else if(currentSort === 'comments') {
+        sortedPosts.sort((a,b) => {
+            if(a.comments.length !== b.comments.length) {
+                return (a.comments.length - b.comments.length) * orderMultiplier;
+            }
+            return b.timestamp - a.timestamp;
+        });
+    }
+    
+    postListDiv.innerHTML = ''; 
+
+    sortedPosts.forEach(post=>{
+        const postDiv=document.createElement('div');
+        postDiv.className='post';
+        postDiv.id='post_'+post.id;
+
+        const isLong=post.content.length>300;
+        const contentClass=isLong?'post-content collapsed':'post-content';
+
+        postDiv.innerHTML=`
+            <div class='info'>${post.nickname} · ${new Date(post.timestamp).toLocaleString()}</div>
+            <div id='content${post.id}' class='${contentClass}'>${post.content}</div>
+            ${isLong?`<button class='toggle-content-btn' id='toggleBtn${post.id}' onclick='toggleContent("${post.id}")'>내용 펼치기 ▼</button>`:''}
+            ${isAdmin?`<button class='delete-post-btn' onclick='deletePost("${post.id}")'>삭제 🗑️</button>`:''}
+            <div class='actions'>
+                <span onclick='agreePost(event,"${post.id}")'>👍 동의 (<span id="agreeCount_${post.id}">${post.agree}</span>)</span>
+                <span class='comment-btn' onclick='toggleComment("${post.id}")'>💬 댓글 ${post.comments.length}개</span>
+            </div>
+            <div class='comment-section' id='c${post.id}' style='display:none;'>
+                <div class='comment-list'></div>
+                <div class='comment-input-area'>
+                    <textarea id='commentInput${post.id}' placeholder='댓글 입력'></textarea>
+                    <button onclick='submitComment("${post.id}")'>작성</button>
+                </div>
+            </div>
+        `;
+
+        postListDiv.appendChild(postDiv);
+        renderComments(post.id,false);
+    });
+
+    // 재렌더링 후 저장해둔 댓글창 ID를 다시 엽니다.
+    openCommentIds.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.style.display = 'flex';
+            scrollCommentBottom(section.id.substring(1));
+        }
+    });
+}
+
+function renderComments(postId,scroll=true){
+    const post = posts.find(p=>p.id===postId);
+    if(!post) return;
+    const section = document.getElementById('c'+postId);
+    if(!section) return;
+    const listDiv = section.querySelector('.comment-list');
+    listDiv.innerHTML = post.comments.map((c,index)=>{
+        const isAuthor = c.nickname === localStorage.getItem('nickname');
+        return `<div class='comment'>- ${c.nickname}: ${c.content} 
+            <span class='comment-actions' onclick='agreeComment(event,"${postId}",${index})'>👍 ${c.agree}</span>
+            ${isAuthor?`<span class='comment-delete' onclick='deleteComment(event,"${postId}",${index})'>삭제</span>`:''}
+        </div>`;
+    }).join('');
+    scroll && scrollCommentBottom(postId);
+}
+
+// 💡 자동 게시 로직이 posts 배열을 업데이트했으므로, 페이지 로드 후 게시물 렌더링을 실행합니다.
+document.addEventListener('DOMContentLoaded', renderPosts);
+
+</script>
+</body>
+</html>
