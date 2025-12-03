@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>INTP today - 검증 및 첫 게시</title>
+  <title>INTP today - 들어가기 전에...</title>
   <style>
     body { margin: 0 auto; padding: 60px 30px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #ffffff; color: #111; max-width: 700px; line-height: 1.6; }
     h1 { font-size: 26px; font-weight: 600; margin-bottom: 40px; }
@@ -19,24 +19,25 @@
 <body>
 
   <h1>INTP.today</h1>
-  <p>INTP 전용 커뮤니티 입장에 앞서 간단한 검증 질문에 답해 주십시오.</p>
+  <p>INTP today의 입장에 앞서 간단한 질문에 답해 주십시오.<br>
+  사실 사이트 자체는 엄청 허접하니 아무것도 기대하시면 안됩니다...</p>
 
   <div class="notice">
-    ⚠️ **주의: 이 답변은 커뮤니티 페이지 접속과 동시에 첫 번째 게시물로 자동 업로드됩니다.**
+    ⚠️ **주의: 이 답변은 제출과 동시에 게시물로 자동 업로드됩니다.**
   </div>
 
   <label>
-    Q. 당신은 중대한 우주의 비밀에 대해 6개월간 고심한 끝에 완벽한 논리적 설명을 발견해냈습니다. 이 위대한 발견을 **우주에 대한 이해도가 낮은 애인에게 5분 안에 발표해야 합니다.**<br>
-    당신은 어떻게 발표를 준비할까요? 논리적 설명의 깊이와 커뮤니케이션의 효율성 중 무엇을 우선시할지 설명해 주십시오. (최소 50자 이상)
+    Q. 당신은 중대한 우주의 비밀에 대해 6개월간 고심한 끝에 완벽한 논리적 설명을 발견해냈습니다. 이 위대한 발견을 우주에 대한 이해도가 낮은 애인에게 5분 안에 발표해야 합니다.<br>
+    당신은 어떻게 발표를 준비할까요? (최소 50자 이상)
     <textarea id="answer" required></textarea>
   </label>
 
   <label>
-    사용할 닉네임 (커뮤니티에서 사용할 이름)
+    INTP Today에서 사용할 닉네임
     <input type="text" id="nickname" placeholder="닉네임 입력" required>
   </label>
 
-  <button onclick="submitForm()">답변 제출 및 커뮤니티 입장</button>
+  <button onclick="submitForm()">답변 제출하며 시끄럽게 등장하기</button>
 
   <div id="result"></div>
 
@@ -49,12 +50,12 @@ function submitForm() {
 
     if (!answer || answer.length < 50) { 
         resultDiv.style.color = "red";
-        resultDiv.innerHTML = "답변은 최소 50자 이상 입력해야 합니다.";
+        resultDiv.innerHTML = "답변은 최소 50자 이상!";
         return;
     }
     if (!nickname) {
         resultDiv.style.color = "red";
-        resultDiv.innerHTML = "사용할 닉네임을 입력해야 합니다.";
+        resultDiv.innerHTML = "닉네임을 왜 안 적는가 자네";
         return;
     }
 
@@ -64,7 +65,7 @@ function submitForm() {
     
     // 2. 즉시 커뮤니티 페이지로 리다이렉션
     resultDiv.style.color = "green";
-    resultDiv.innerHTML = `${nickname}님의 답변이 게시판에 업로드됩니다. 잠시 후 입장합니다...`;
+    resultDiv.innerHTML = `${nickname}님의 답변 업로드 중(돌이킬 수 없음). 잠시 후 입장합니다...`;
     
     setTimeout(() => {
          window.location.href = "community.html"; 
