@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>INTP Community - 최신판</title>
+<title>INTP Today - 마구 지껄이기</title>
 <style>
 body { font-family: Arial, sans-serif; background: #fff; margin: 0; padding: 40px; overflow-y: auto; }
 h1 { font-weight: 600; font-size: 26px; margin-bottom: 20px; }
@@ -32,10 +32,11 @@ button { padding: 8px 14px; margin-top: 10px; cursor: pointer; background: black
 </head>
 <body>
 <div class="container">
-<h1>INTP 커뮤니티 (최신판)</h1>
+<h1>INTP today</h1>
+<h3>오늘의 한마디 : 모두가 똑같은 것을 원하는 사회는 비정상이다.</h3>
 <div class="nickname" id="nicknameDisplay"></div>
 
-<textarea id="postInput" placeholder="당신의 아무말을 남겨보세요."></textarea>
+<textarea id="postInput" placeholder="아무 말이나 지껄이기"></textarea>
 <button onclick="submitPost()">게시</button>
 
 <div class="sort-buttons">
@@ -61,8 +62,8 @@ function checkAccess(){
     const storedNickname = localStorage.getItem("nickname");
     
     if (!storedNickname || storedNickname.trim() === "") {
-        alert("커뮤니티 이용을 위해서는 먼저 검증 페이지를 통과해야 합니다.");
-        // window.location.href = "index.html"; // 실제 운영 시 주석 해제
+        alert("INTP today에 접속하시기 전에 부탁이 있어요...");
+         window.location.href = "index.html"; 실제 운영 시 주석 해제
     }
 }
 
